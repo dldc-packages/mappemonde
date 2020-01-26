@@ -1,0 +1,1 @@
+export { Mappemonde } from "./Mappemonde";

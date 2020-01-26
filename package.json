@@ -1,0 +1,41 @@
+{
+  "name": "mappemonde",
+  "version": "0.0.0",
+  "license": "MIT",
+  "author": "Etienne Dldc <e.deladonchamps@gmail.com>",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/index.js",
+  "module": "dist/mappemonde.esm.js",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsdx build",
+    "start": "tsdx watch",
+    "test": "tsdx test",
+    "test:watch": "tsdx test --watch",
+    "pub": "yarn build && np"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jest": "^24.9.0",
+    "np": "^5.2.1",
+    "tsdx": "^0.12.3",
+    "tslib": "^1.10.0",
+    "typescript": "^3.7.5"
+  },
+  "description": "A multidimensional Map",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/etienne-dldc/mappemonde.git"
+  },
+  "keywords": [
+    "map",
+    "data structure",
+    "typescript"
+  ],
+  "bugs": {
+    "url": "https://github.com/etienne-dldc/mappemonde/issues"
+  },
+  "homepage": "https://github.com/etienne-dldc/mappemonde#readme"
+}
