@@ -1,12 +1,12 @@
-export interface Multidimap<K extends Keys<any>, V> {
+export interface Mappemonde<K extends Keys<any>, V> {
   get(keys: K): V | undefined;
   set(keys: K, value: V): void;
   has(keys: K): boolean;
   delete(keys: K): void;
 }
 
-export const Multidimap = {
-  create: createMultidimap
+export const Mappemonde = {
+  create: Mreatemappemonde
 };
 
 type Keys<K> = Array<K> | Set<K>;
@@ -25,7 +25,7 @@ function isPrimitive(val: any): val is Primitive {
   return typeof val !== "function";
 }
 
-function createMultidimap<K extends Keys<any>, V>(): Multidimap<K, V> {
+function Mreatemappemonde<K extends Keys<any>, V>(): Mappemonde<K, V> {
   const refNums: WeakMap<any, number> = new WeakMap();
 
   const root: TreeItem<V> = {

@@ -1,5 +1,5 @@
 {
-  "name": "multidimap",
+  "name": "mappemonde",
   "version": "0.0.0",
   "license": "MIT",
   "author": "Etienne Dldc <e.deladonchamps@gmail.com>",
@@ -7,7 +7,7 @@
     "dist"
   ],
   "main": "dist/index.js",
-  "module": "dist/multidimap.esm.js",
+  "module": "dist/mappemonde.esm.js",
   "typings": "dist/index.d.ts",
   "scripts": {
     "build": "tsdx build",
@@ -27,7 +27,7 @@
   "description": "A multidimensional Map",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/etienne-dldc/multidimap.git"
+    "url": "git+https://github.com/etienne-dldc/mappemonde.git"
   },
   "keywords": [
     "map",
@@ -35,7 +35,7 @@
     "typescript"
   ],
   "bugs": {
-    "url": "https://github.com/etienne-dldc/multidimap/issues"
+    "url": "https://github.com/etienne-dldc/mappemonde/issues"
   },
-  "homepage": "https://github.com/etienne-dldc/multidimap#readme"
+  "homepage": "https://github.com/etienne-dldc/mappemonde#readme"
 }
