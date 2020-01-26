@@ -1,1 +1,1 @@
-export { Mappemonde } from "./Mappemonde";
+export { Multidimap } from "./Multidimap";
