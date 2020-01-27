@@ -1,1 +1,5 @@
-export { Mappemonde } from "./Mappemonde";
+export {
+  Mappemonde,
+  MappemondeByPosition,
+  MappemondeOptions
+} from "./Mappemonde";
