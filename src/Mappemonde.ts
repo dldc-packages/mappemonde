@@ -9,8 +9,12 @@ export interface Mappemonde<K extends Keys<any>, V> {
   cleanup(): void;
 }
 
+export type MappemondeByPosition<K extends Array<any>, V> = Mappemonde<K, V>;
+
 export const Mappemonde = {
-  create: createMappemonde
+  create: createMappemondeInternal,
+  byValue: createMappemondeByValue,
+  byPosition: createMappemondeByPosition
 };
 
 type Keys<K> = Array<K> | Set<K>;
@@ -31,8 +35,21 @@ export interface MappemondeOptions {
     | ["everyDelete", number];
 }
 
-function createMappemonde<K extends Keys<any>, V>(
+function createMappemondeByValue<K extends Keys<any>, V>(
   options: MappemondeOptions = {}
+): Mappemonde<K, V> {
+  return createMappemondeInternal<K, V>(options, "value");
+}
+
+function createMappemondeByPosition<K extends Array<any>, V>(
+  options: MappemondeOptions = {}
+): MappemondeByPosition<K, V> {
+  return createMappemondeInternal<K, V>(options, "position");
+}
+
+function createMappemondeInternal<K extends Keys<any>, V>(
+  options: MappemondeOptions = {},
+  mode: "value" | "position" = "value"
 ): Mappemonde<K, V> {
   const { cleanup = "onDelete" } = options;
   const refNums: WeakMap<any, number> = new WeakMap();
@@ -82,6 +99,14 @@ function createMappemonde<K extends Keys<any>, V>(
   }
 
   function normalizeKeys(keys: K): Array<any> {
+    if (mode === "position") {
+      if (keys instanceof Set) {
+        throw new Error(
+          `[Mappemonde] Set are not supported on 'position' mode`
+        );
+      }
+      return keys as any;
+    }
     const keysUniq = keys instanceof Set ? keys : new Set(keys);
     const keysArr = Array.from(keysUniq);
     const primitives: Array<any> = [];
