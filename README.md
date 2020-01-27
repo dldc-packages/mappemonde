@@ -2,7 +2,7 @@
 
 > A multidimensional (variadic keys) [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map)
 
-This library expose a data structure similar to [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) except it accept an arbitrary numner of keys.
+This library expose a data structure similar to [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) except it accept an arbitrary number of keys.
 
 ## Gist
 
