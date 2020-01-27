@@ -44,3 +44,27 @@ test("should work with multiple refs", () => {
   m.set([ref1, ref2], "foo");
   expect(m.get([ref2, ref1])).toEqual("foo");
 });
+
+test("can use no keys", () => {
+  const m = Mappemonde.create<any, any>();
+  m.set([], "foo");
+  expect(m.get([])).toEqual("foo");
+});
+
+test("should cleanup on remove", () => {
+  const m = Mappemonde.create<any, any>();
+  m.set([43, 6], "foo");
+  expect(m.get([43, 6])).toEqual("foo");
+  m.delete([43, 6]);
+  expect(m.get([43, 6])).toEqual(undefined);
+  expect((m as any).__internal.children.size).toEqual(0);
+});
+
+test("should never cleanup when option is set to none", () => {
+  const m = Mappemonde.create<any, any>({ cleanup: "never" });
+  m.set([43, 6], "foo");
+  expect(m.get([43, 6])).toEqual("foo");
+  m.delete([43, 6]);
+  expect(m.get([43, 6])).toEqual(undefined);
+  expect((m as any).__internal.children.size).toEqual(1);
+});

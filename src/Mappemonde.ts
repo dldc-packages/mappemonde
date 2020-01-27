@@ -3,46 +3,73 @@ export interface Mappemonde<K extends Keys<any>, V> {
   set(keys: K, value: V): void;
   has(keys: K): boolean;
   delete(keys: K): void;
+  entries(): Array<[K, V]>;
+  values(): Array<V>;
+  keys(): Array<K>;
+  cleanup(): void;
 }
 
 export const Mappemonde = {
-  create: Mreatemappemonde
+  create: createMappemonde
 };
 
 type Keys<K> = Array<K> | Set<K>;
 
 interface TreeItem<T> {
   value: { val: T } | null;
+  parent: null | [any, TreeItem<T>];
   children: Map<any, TreeItem<T>>;
 }
 
 type Primitive = null | undefined | string | number | boolean | symbol;
 
-function isPrimitive(val: any): val is Primitive {
-  if (typeof val === "object") {
-    return val === null;
-  }
-  return typeof val !== "function";
+export interface MappemondeOptions {
+  cleanup?:
+    | "never"
+    | "onDelete"
+    | ["everySeconds", number]
+    | ["everyDelete", number];
 }
 
-function Mreatemappemonde<K extends Keys<any>, V>(): Mappemonde<K, V> {
+function createMappemonde<K extends Keys<any>, V>(
+  options: MappemondeOptions = {}
+): Mappemonde<K, V> {
+  const { cleanup = "onDelete" } = options;
   const refNums: WeakMap<any, number> = new WeakMap();
 
+  const cleanupMode = Array.isArray(cleanup) ? cleanup[0] : cleanup;
+  const cleanupNum = Array.isArray(cleanup) ? cleanup[1] : 0;
+
+  let removeCount = cleanupNum;
+
   const root: TreeItem<V> = {
+    parent: null,
     value: null,
     children: new Map()
   };
 
   let nextRefNum = 0;
 
-  return {
+  if (cleanupMode === "everySeconds") {
+    setInterval(() => {
+      cleanupTree();
+    }, cleanupNum * 1000);
+  }
+
+  const Mappemonde: Mappemonde<K, V> = {
     get,
     set,
     has,
-    delete: remove
-    // cleanup,
-    // forEach
+    delete: remove,
+    entries,
+    keys,
+    values,
+    cleanup: cleanupTree
   };
+
+  (Mappemonde as any).__internal = root;
+
+  return Mappemonde;
 
   function refNum(ref: any): number {
     if (refNums.has(ref)) {
@@ -82,6 +109,7 @@ function Mreatemappemonde<K extends Keys<any>, V>(): Mappemonde<K, V> {
         current = next;
       } else {
         const newItem: TreeItem<V> = {
+          parent: [k, current],
           value: null,
           children: new Map()
         };
@@ -120,53 +148,112 @@ function Mreatemappemonde<K extends Keys<any>, V>(): Mappemonde<K, V> {
     return current.value === null ? undefined : current.value.val;
   }
 
-  // function isEmpty(item: TreeItem<V>): boolean {
-  //   return item.value === null && item.children.size === 0;
-  // }
-
   function remove(keys: K): void {
     const ks = normalizeKeys(keys);
     let current = root;
-    const parents: Array<TreeItem<V>> = [current];
     for (let i = 0; i < ks.length; i++) {
       const key = ks[i];
       const next = current.children.get(key);
       if (!next) {
         return;
       }
-      parents.push(next);
       current = next;
     }
     if (current.value === null) {
       return;
     }
     current.value = null;
-    // cleanup ?
-    // do {
-    //   if (current.value)
-
-    // } while (parents.length > 0);
+    if (cleanupMode === "onDelete") {
+      cleanupItem(current);
+    }
+    if (cleanupMode === "everyDelete") {
+      removeCount++;
+      if (removeCount === cleanupNum) {
+        removeCount = 0;
+        cleanupTree();
+      }
+    }
   }
 
-  // function forEach(
-  //   callbackfn: (k1: string, k2: string, value: T) => void
-  // ): void {
-  //   root.forEach((l1, k1) => {
-  //     l1.forEach((val, k2) => {
-  //       callbackfn(k1, k2, val);
-  //     });
-  //   });
-  // }
+  function entries(): Array<[K, V]> {
+    let result: Array<[K, V]> = [];
+    traverse((item, keys) => {
+      if (item.value !== null) {
+        result.push([keys, item.value.val]);
+      }
+      return true;
+    });
+    return result;
+  }
 
-  // function cleanup() {
-  //   const cleanupQueue: Array<string> = [];
-  //   root.forEach((l1, k1) => {
-  //     if (l1.size === 0) {
-  //       cleanupQueue.push(k1);
-  //     }
-  //   });
-  //   cleanupQueue.forEach(k1 => {
-  //     root.delete(k1);
-  //   });
-  // }
+  function keys(): Array<K> {
+    return entries().map(([k]) => k);
+  }
+
+  function values(): Array<V> {
+    return entries().map(([, v]) => v);
+  }
+
+  function traverse(onItem: (item: TreeItem<V>, keys: K) => boolean): void {
+    const queue: Array<[Array<any>, TreeItem<V>]> = [[[], root]];
+    while (queue.length > 0) {
+      const next = queue.pop();
+      if (!next) {
+        break;
+      }
+      const [keys, item] = next;
+      const stop = onItem(item, keys as any) === false;
+      if (stop) {
+        break;
+      }
+      if (item.children.size > 0) {
+        const children: Array<[Array<any>, TreeItem<V>]> = Array.from(
+          item.children.entries()
+        ).map(([k, child]) => [[...keys, k], child]);
+        queue.push(...children);
+      }
+    }
+  }
+
+  function cleanupTree() {
+    // 1. find empty items
+    const emptyItems: Array<TreeItem<V>> = [];
+    traverse(item => {
+      if (isEmpty(item)) {
+        emptyItems.push(item);
+      }
+      return true;
+    });
+    for (let i = 0; i < emptyItems.length; i++) {
+      const item = emptyItems[i];
+      cleanupItem(item);
+    }
+  }
+
+  function cleanupItem(item: TreeItem<V>) {
+    let current = item;
+    while (true) {
+      if (!isEmpty(current)) {
+        break;
+      }
+      if (current.parent === null) {
+        return;
+      }
+      const [key, parent] = current.parent;
+      // the item is empty, we get it's parent and remove it !
+      parent.children.delete(key);
+      current = parent;
+    }
+  }
+}
+
+function isEmpty(item: TreeItem<any>): boolean {
+  return item.value === null && item.children.size === 0;
+}
+
+function isPrimitive(val: any): val is Primitive {
+  if (typeof val === "object") {
+    return val === null;
+  }
+  return typeof val !== "function";
 }
