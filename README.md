@@ -7,28 +7,43 @@ This library expose a data structure similar to [Map](https://developer.mozilla.
 ## Gist
 
 ```ts
-import { Mappemonde } from "mappemonde";
+import { Mappemonde } from 'mappemonde';
 
-const m = Mappemonde.create();
-m.set(["foo", 42], "bar");
-m.get(["foo", 42]); // => 'bar'
-// keys order does not matter
-m.get([42, "foo"]); // => 'bar'
-// keys can also be a Set
-m.get(new Set([42, "foo"])); // => 'bar'
+const m = Mappemonde.byValue();
+m.set(['foo', 42], 'bar');
+m.get(['foo', 42]); // => 'bar'
+```
+
+## Position vs Value
+
+Mappemonde can work in two distinc modes: **position** or **value**. The define define how items are identified:
+
+- in **value** mode the order of the keys does not matter and you can even pass a `Set` as a list of keys.
+- in **position** mode, the order does matter and you can't use a `Set` because they are unordered.
+
+You need to choose the mode you want to use when you create a Mappemonde:
+
+```ts
+const positionalMap = Mappemonde.byPosition();
+const valueMap = Mappemonde.byValue();
 ```
 
 ## API
 
-### Mappemonde.create
+### Creating a Mappemonde
 
-> Create a Mappemonde
+> In both case you get back a Mappemonde instance
 
 ```ts
-Mappemonde.create();
+Mappemonde.byPosition();
+// or
+Mappemonde.byValue();
+// or
+Mappemonde.create('value');
+Mappemonde.create('position');
 ```
 
-### Methods
+### Mappemonde instance
 
 ```ts
 export interface Mappemonde<K extends Keys<any>, V> {
@@ -48,13 +63,13 @@ export interface Mappemonde<K extends Keys<any>, V> {
 This library is written in TypeScript and expose strict types !
 
 ```ts
-import { Mappemonde } from "mappemonde";
+import { Mappemonde } from 'mappemonde';
 
 // keys should be number, value should be string
-const m1 = Mappemonde.create<Array<number>, string>();
+const m1 = Mappemonde.byValue<Array<number>, string>();
 
 // keys should be of lenth 2 with first a string then a number
-const m2 = Mappemonde.create<[string, number], string>();
+const m2 = Mappemonde.byPosition<[string, number], string>();
 ```
 
 ## Cleanup
@@ -64,19 +79,19 @@ Internally this library uses a tree of `Map`. This mean that if you `set`, then 
 If this strategy doesn't work for you, you can change it using the `cleanup` option:
 
 ```ts
-import { Mappemonde } from "mappemonde";
+import { Mappemonde } from 'mappemonde';
 
 // never cleanup
-const m1 = Mappemonde.create({ cleanup: "never" });
+const m1 = Mappemonde.byValue({ cleanup: 'never' });
 // you can call cleanup yourself
 m1.cleanup();
 
 // cleanup when you delete an item (default value)
-const m2 = Mappemonde.create({ cleanup: "onDelete" });
+const m2 = Mappemonde.byPosotion({ cleanup: 'onDelete' });
 
 // cleanup every 10 delete
-const m3 = Mappemonde.create({ cleanup: ["everyDelete", 10] });
+const m3 = Mappemonde.create('value', { cleanup: ['everyDelete', 10] });
 
 // cleanup every 10 seconds
-const m4 = Mappemonde.create({ cleanup: ["everySeconds", 10] });
+const m4 = Mappemonde.create('position', { cleanup: ['periodically', 10 * 1000] });
 ```
