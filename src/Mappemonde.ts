@@ -14,7 +14,7 @@ export type MappemondeByPosition<K extends Array<any>, V> = Mappemonde<K, V>;
 export const Mappemonde = {
   create: createMappemondeInternal,
   byValue: createMappemondeByValue,
-  byPosition: createMappemondeByPosition,
+  byPosition: createMappemondeByPosition
 };
 
 type Keys<K> = Array<K> | Set<K>;
@@ -28,26 +28,30 @@ interface TreeItem<T> {
 type Primitive = null | undefined | string | number | boolean | symbol;
 
 export interface MappemondeOptions {
-  cleanup?: 'never' | 'onDelete' | ['periodically', number] | ['everyDelete', number];
+  cleanup?:
+    | "never"
+    | "onDelete"
+    | ["periodically", number]
+    | ["everyDelete", number];
 }
 
 function createMappemondeByValue<K extends Keys<any>, V>(
   options: MappemondeOptions = {}
 ): Mappemonde<K, V> {
-  return createMappemondeInternal<K, V>('value', options);
+  return createMappemondeInternal<K, V>("value", options);
 }
 
 function createMappemondeByPosition<K extends Array<any>, V>(
   options: MappemondeOptions = {}
 ): MappemondeByPosition<K, V> {
-  return createMappemondeInternal<K, V>('position', options);
+  return createMappemondeInternal<K, V>("position", options);
 }
 
 function createMappemondeInternal<K extends Keys<any>, V>(
-  mode: 'value' | 'position',
+  mode: "value" | "position",
   options: MappemondeOptions = {}
 ): Mappemonde<K, V> {
-  const { cleanup = 'onDelete' } = options;
+  const { cleanup = "onDelete" } = options;
   const refNums: WeakMap<any, number> = new WeakMap();
 
   const cleanupMode = Array.isArray(cleanup) ? cleanup[0] : cleanup;
@@ -58,12 +62,12 @@ function createMappemondeInternal<K extends Keys<any>, V>(
   const root: TreeItem<V> = {
     parent: null,
     value: null,
-    children: new Map(),
+    children: new Map()
   };
 
   let nextRefNum = 0;
 
-  if (cleanupMode === 'periodically') {
+  if (cleanupMode === "periodically") {
     setInterval(() => {
       cleanupTree();
     }, cleanupNum * 1000);
@@ -77,7 +81,7 @@ function createMappemondeInternal<K extends Keys<any>, V>(
     entries,
     keys,
     values,
-    cleanup: cleanupTree,
+    cleanup: cleanupTree
   };
 
   (Mappemonde as any).__internal = root;
@@ -95,9 +99,11 @@ function createMappemondeInternal<K extends Keys<any>, V>(
   }
 
   function normalizeKeys(keys: K): Array<any> {
-    if (mode === 'position') {
+    if (mode === "position") {
       if (keys instanceof Set) {
-        throw new Error(`[Mappemonde] Set are not supported on 'position' mode`);
+        throw new Error(
+          `[Mappemonde] Set are not supported on 'position' mode`
+        );
       }
       return keys as any;
     }
@@ -105,7 +111,7 @@ function createMappemondeInternal<K extends Keys<any>, V>(
     const keysArr = Array.from(keysUniq);
     const primitives: Array<any> = [];
     const refs: Array<any> = [];
-    keysArr.forEach((item) => {
+    keysArr.forEach(item => {
       if (isPrimitive(item)) {
         primitives.push(item);
       } else {
@@ -122,7 +128,7 @@ function createMappemondeInternal<K extends Keys<any>, V>(
   function set(keys: K, value: V): void {
     const ks = normalizeKeys(keys);
     let current = root;
-    ks.forEach((k) => {
+    ks.forEach(k => {
       let next = current.children.get(k);
       if (next) {
         current = next;
@@ -130,7 +136,7 @@ function createMappemondeInternal<K extends Keys<any>, V>(
         const newItem: TreeItem<V> = {
           parent: [k, current],
           value: null,
-          children: new Map(),
+          children: new Map()
         };
         current.children.set(k, newItem);
         current = newItem;
@@ -182,10 +188,10 @@ function createMappemondeInternal<K extends Keys<any>, V>(
       return;
     }
     current.value = null;
-    if (cleanupMode === 'onDelete') {
+    if (cleanupMode === "onDelete") {
       cleanupItem(current);
     }
-    if (cleanupMode === 'everyDelete') {
+    if (cleanupMode === "everyDelete") {
       removeCount++;
       if (removeCount >= cleanupNum) {
         removeCount = 0;
@@ -237,7 +243,7 @@ function createMappemondeInternal<K extends Keys<any>, V>(
   function cleanupTree() {
     // 1. find empty items
     const emptyItems: Array<TreeItem<V>> = [];
-    traverse((item) => {
+    traverse(item => {
       if (isEmpty(item)) {
         emptyItems.push(item);
       }
@@ -271,8 +277,8 @@ function isEmpty(item: TreeItem<any>): boolean {
 }
 
 function isPrimitive(val: any): val is Primitive {
-  if (typeof val === 'object') {
+  if (typeof val === "object") {
     return val === null;
   }
-  return typeof val !== 'function';
+  return typeof val !== "function";
 }
