@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest';
 import { Mappemonde } from '../src/mod';
 
 test('Readme example should work', () => {
