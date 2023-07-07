@@ -24,7 +24,7 @@ export type CleanupMode = Extract<Cleanup, string> | Extract<Cleanup, Array<any>
 export class Mappemonde<K extends Keys<any>, V> {
   public static createMappemondeInternal<K extends Keys<any>, V>(
     mode: 'value' | 'position',
-    options: MappemondeOptions = {}
+    options: MappemondeOptions = {},
   ): Mappemonde<K, V> {
     return new Mappemonde(mode, options);
   }
@@ -45,7 +45,10 @@ export class Mappemonde<K extends Keys<any>, V> {
   public readonly cleanupMode: CleanupMode;
   public readonly cleanupNum: number;
 
-  constructor(public readonly mode: 'value' | 'position', options: MappemondeOptions = {}) {
+  constructor(
+    public readonly mode: 'value' | 'position',
+    options: MappemondeOptions = {},
+  ) {
     const { cleanup = 'onDelete' } = options;
     this.cleanupMode = Array.isArray(cleanup) ? cleanup[0] : cleanup;
     this.cleanupNum = Array.isArray(cleanup) ? cleanup[1] : 0;
