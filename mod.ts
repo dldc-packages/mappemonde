@@ -1,8 +1,17 @@
+// deno-lint-ignore-file no-explicit-any
+
 export type Keys<K> = Array<K> | Set<K>;
 
 export type MappemondeByPosition<K extends Array<any>, V> = Mappemonde<K, V>;
 
-export type Primitive = null | undefined | string | number | bigint | boolean | symbol;
+export type Primitive =
+  | null
+  | undefined
+  | string
+  | number
+  | bigint
+  | boolean
+  | symbol;
 
 /**
  * Internal type for a tree item.
@@ -13,31 +22,45 @@ export interface TreeItem<T> {
   children: Map<any, TreeItem<T>>;
 }
 
-export type Cleanup = 'never' | 'onDelete' | ['periodically', number] | ['everyDelete', number];
+export type Cleanup =
+  | "never"
+  | "onDelete"
+  | ["periodically", number]
+  | ["everyDelete", number];
 
 export interface MappemondeOptions {
   cleanup?: Cleanup;
 }
 
-export type CleanupMode = Extract<Cleanup, string> | Extract<Cleanup, Array<any>>[0];
+export type CleanupMode =
+  | Extract<Cleanup, string>
+  | Extract<Cleanup, Array<any>>[0];
 
 export class Mappemonde<K extends Keys<any>, V> {
   public static createMappemondeInternal<K extends Keys<any>, V>(
-    mode: 'value' | 'position',
+    mode: "value" | "position",
     options: MappemondeOptions = {},
   ): Mappemonde<K, V> {
     return new Mappemonde(mode, options);
   }
 
-  public static byValue<K extends Keys<any>, V>(options: MappemondeOptions = {}): Mappemonde<K, V> {
-    return new Mappemonde('value', options);
+  public static byValue<K extends Keys<any>, V>(
+    options: MappemondeOptions = {},
+  ): Mappemonde<K, V> {
+    return new Mappemonde("value", options);
   }
 
-  public static byPosition<K extends Array<any>, V>(options: MappemondeOptions = {}): MappemondeByPosition<K, V> {
-    return new Mappemonde('position', options);
+  public static byPosition<K extends Array<any>, V>(
+    options: MappemondeOptions = {},
+  ): MappemondeByPosition<K, V> {
+    return new Mappemonde("position", options);
   }
 
-  private readonly root: TreeItem<V> = { parent: null, value: null, children: new Map() };
+  private readonly root: TreeItem<V> = {
+    parent: null,
+    value: null,
+    children: new Map(),
+  };
   private readonly refNums: WeakMap<any, number> = new WeakMap();
   private nextRefNum = 0;
   private removeCount = 0;
@@ -46,14 +69,14 @@ export class Mappemonde<K extends Keys<any>, V> {
   public readonly cleanupNum: number;
 
   constructor(
-    public readonly mode: 'value' | 'position',
+    public readonly mode: "value" | "position",
     options: MappemondeOptions = {},
   ) {
-    const { cleanup = 'onDelete' } = options;
+    const { cleanup = "onDelete" } = options;
     this.cleanupMode = Array.isArray(cleanup) ? cleanup[0] : cleanup;
     this.cleanupNum = Array.isArray(cleanup) ? cleanup[1] : 0;
 
-    if (this.cleanupMode === 'periodically') {
+    if (this.cleanupMode === "periodically") {
       setInterval(() => {
         this.cleanupTree();
       }, this.cleanupNum);
@@ -61,9 +84,11 @@ export class Mappemonde<K extends Keys<any>, V> {
   }
 
   private normalizeKeys(keys: K): Array<any> {
-    if (this.mode === 'position') {
+    if (this.mode === "position") {
       if (keys instanceof Set) {
-        throw new Error(`[Mappemonde] Set are not supported on 'position' mode`);
+        throw new Error(
+          `[Mappemonde] Set are not supported on 'position' mode`,
+        );
       }
       return keys as any;
     }
@@ -123,10 +148,9 @@ export class Mappemonde<K extends Keys<any>, V> {
         break;
       }
       if (item.children.size > 0) {
-        const children: Array<[Array<any>, TreeItem<V>]> = Array.from(item.children.entries()).map(([k, child]) => [
-          [...keys, k],
-          child,
-        ]);
+        const children: Array<[Array<any>, TreeItem<V>]> = Array.from(
+          item.children.entries(),
+        ).map(([k, child]) => [[...keys, k], child]);
         queue.push(...children);
       }
     }
@@ -211,10 +235,10 @@ export class Mappemonde<K extends Keys<any>, V> {
       return;
     }
     current.value = null;
-    if (this.cleanupMode === 'onDelete') {
+    if (this.cleanupMode === "onDelete") {
       this.cleanupItem(current);
     }
-    if (this.cleanupMode === 'everyDelete') {
+    if (this.cleanupMode === "everyDelete") {
       this.removeCount++;
       if (this.removeCount >= this.cleanupNum) {
         this.removeCount = 0;
@@ -248,8 +272,8 @@ function isEmpty(item: TreeItem<any>): boolean {
 }
 
 function isPrimitive(val: any): val is Primitive {
-  if (typeof val === 'object') {
+  if (typeof val === "object") {
     return val === null;
   }
-  return typeof val !== 'function';
+  return typeof val !== "function";
 }
