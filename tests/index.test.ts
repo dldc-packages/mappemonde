@@ -1,4 +1,4 @@
-import { expect } from "$std/expect/mod.ts";
+import { expect } from "@std/expect";
 import { Mappemonde } from "../mod.ts";
 
 Deno.test("Readme example should work", () => {

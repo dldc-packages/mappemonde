@@ -1,6 +1,4 @@
-// deno-lint-ignore-file no-explicit-any
-
-import { expect } from "$std/expect/mod.ts";
+import { expect } from "@std/expect";
 import { Mappemonde } from "../mod.ts";
 
 Deno.test("create a Mappemonde without error", () => {
