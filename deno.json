@@ -1,6 +1,6 @@
 {
   "name": "@dldc/mappemonde",
-  "version": "6.0.2",
+  "version": "6.0.3",
   "exports": "./mod.ts",
   "tasks": {
     "test": "deno test -A",
