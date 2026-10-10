@@ -1,7 +1,7 @@
-import { expect } from "@std/expect";
-import { Mappemonde } from "../mod.ts";
+import { expect, test } from "vite-plus/test";
+import { Mappemonde } from "../src/index.ts";
 
-Deno.test("Readme example should work", () => {
+test("Readme example should work", () => {
   const m = Mappemonde.byValue();
   m.set(["foo", 42], "bar");
   expect(m.get(["foo", 42])).toBe("bar"); // => 'bar'

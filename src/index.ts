@@ -1,17 +1,8 @@
-// deno-lint-ignore-file no-explicit-any
-
 export type Keys<K> = Array<K> | Set<K>;
 
 export type MappemondeByPosition<K extends Array<any>, V> = Mappemonde<K, V>;
 
-export type Primitive =
-  | null
-  | undefined
-  | string
-  | number
-  | bigint
-  | boolean
-  | symbol;
+export type Primitive = null | undefined | string | number | bigint | boolean | symbol;
 
 /**
  * Internal type for a tree item.
@@ -22,19 +13,13 @@ export interface TreeItem<T> {
   children: Map<any, TreeItem<T>>;
 }
 
-export type Cleanup =
-  | "never"
-  | "onDelete"
-  | ["periodically", number]
-  | ["everyDelete", number];
+export type Cleanup = "never" | "onDelete" | ["periodically", number] | ["everyDelete", number];
 
 export interface MappemondeOptions {
   cleanup?: Cleanup;
 }
 
-export type CleanupMode =
-  | Extract<Cleanup, string>
-  | Extract<Cleanup, Array<any>>[0];
+export type CleanupMode = Extract<Cleanup, string> | Extract<Cleanup, Array<any>>[0];
 
 export class Mappemonde<K extends Keys<any>, V> {
   public static createMappemondeInternal<K extends Keys<any>, V>(
@@ -44,9 +29,7 @@ export class Mappemonde<K extends Keys<any>, V> {
     return new Mappemonde(mode, options);
   }
 
-  public static byValue<K extends Keys<any>, V>(
-    options: MappemondeOptions = {},
-  ): Mappemonde<K, V> {
+  public static byValue<K extends Keys<any>, V>(options: MappemondeOptions = {}): Mappemonde<K, V> {
     return new Mappemonde("value", options);
   }
 
@@ -86,9 +69,7 @@ export class Mappemonde<K extends Keys<any>, V> {
   private normalizeKeys(keys: K): Array<any> {
     if (this.mode === "position") {
       if (keys instanceof Set) {
-        throw new Error(
-          `[Mappemonde] Set are not supported on 'position' mode`,
-        );
+        throw new Error(`[Mappemonde] Set are not supported on 'position' mode`);
       }
       return keys as any;
     }
@@ -148,9 +129,9 @@ export class Mappemonde<K extends Keys<any>, V> {
         break;
       }
       if (item.children.size > 0) {
-        const children: Array<[Array<any>, TreeItem<V>]> = Array.from(
-          item.children.entries(),
-        ).map(([k, child]) => [[...keys, k], child]);
+        const children: Array<[Array<any>, TreeItem<V>]> = Array.from(item.children.entries()).map(
+          ([k, child]) => [[...keys, k], child],
+        );
         queue.push(...children);
       }
     }
